@@ -17,19 +17,17 @@ export type ActivityEvent = {
 
 export const ACTIVITY_CHANNEL = "activity";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export const SUPABASE_URL = "https://xbybtekfepvikmwiymnp.supabase.co";
+export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_D0jEQT7V1kWMt3unAjDujQ_O44Ar5H_";
 
 export async function publishActivity(event: ActivityEvent) {
-  if (!supabaseUrl || !supabaseAnonKey) return;
-
   try {
-    await fetch(`${supabaseUrl}/realtime/v1/api/broadcast`, {
+    await fetch(`${SUPABASE_URL}/realtime/v1/api/broadcast`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({
         messages: [{ topic: ACTIVITY_CHANNEL, event: ACTIVITY_CHANNEL, payload: event, private: false }],

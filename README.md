@@ -27,7 +27,7 @@ Per current build scope, this is a **full-stack app with no live payment gateway
 - **Bidding, leaderboard, concurrency safety, notifications, auth, admin** — all real, backed by Postgres, tested end-to-end.
 - **Payments** — `PAYMENTS_PROVIDER=simulated` (default) auto-approves every "payment" so the full order → verify → confirm-bid architecture can be exercised without a merchant account. Flip to `PAYMENTS_PROVIDER=razorpay` and set the `RAZORPAY_*` env vars once you have Razorpay keys — `src/lib/payments/razorpayProvider.ts` is ready, including webhook signature verification. No other code needs to change.
 - **Phone OTP** — accepts any phone number as long as the code matches `DEV_OTP_BYPASS_CODE` in `.env`. There's no SMS provider wired up. Swap `src/lib/auth.ts`'s `phone-otp` provider for MSG91/Twilio before launch.
-- **Live activity** — broadcasts over Supabase Realtime (`src/lib/eventBus.ts` publishes via the REST broadcast endpoint, `src/hooks/useActivityFeed.ts` subscribes client-side), so it works across Vercel's serverless instances. Set `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` to enable it; without them, bidding/leaderboards still work but live updates are silently skipped.
+- **Live activity** — broadcasts over Supabase Realtime (`src/lib/eventBus.ts` publishes via the REST broadcast endpoint, `src/hooks/useActivityFeed.ts` subscribes client-side), so it works across Vercel's serverless instances. The Supabase URL/publishable key are hardcoded in `src/lib/eventBus.ts` (they're public, client-exposed values, not secrets).
 - **Email notifications** — not implemented; only in-app notifications exist today (`Notification` table + `/dashboard`).
 
 ## Key architecture notes
