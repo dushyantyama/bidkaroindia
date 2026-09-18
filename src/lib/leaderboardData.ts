@@ -1,28 +1,32 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { computeMinNextBid, type IncrementTier } from "@/lib/currency";
 import type { LeaderboardResponse } from "@/types/leaderboard";
 
-export async function getLeaderboardData(slug: string): Promise<LeaderboardResponse | null> {
+/**
+ * cache() dedupes this per request: the page and its generateMetadata both
+ * need the same data, and Next only auto-dedupes fetch(), not Prisma calls.
+ */
+export const getLeaderboardData = cache(async (slug: string): Promise<LeaderboardResponse | null> => {
   const board = await prisma.leaderboard.findUnique({ where: { slug } });
   if (!board) return null;
 
-  const bids = await prisma.bid.findMany({
-    where: { leaderboardId: board.id },
-    orderBy: [{ amount: "desc" }, { createdAt: "asc" }],
-    distinct: ["userId"],
-    take: 50,
-    include: { user: { select: { username: true, avatarUrl: true, instagram: true, city: true } } },
-  });
-
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  const bidsLastHour = await prisma.bid.count({ where: { leaderboardId: board.id, createdAt: { gte: hourAgo } } });
-  const topChangesToday = await prisma.leaderboardEvent.count({
-    where: {
-      leaderboardId: board.id,
-      eventType: "NEW_TOP",
-      createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
-    },
-  });
+  const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+
+  const [bids, bidsLastHour, topChangesToday] = await Promise.all([
+    prisma.bid.findMany({
+      where: { leaderboardId: board.id },
+      orderBy: [{ amount: "desc" }, { createdAt: "asc" }],
+      distinct: ["userId"],
+      take: 50,
+      include: { user: { select: { username: true, avatarUrl: true, instagram: true, city: true } } },
+    }),
+    prisma.bid.count({ where: { leaderboardId: board.id, createdAt: { gte: hourAgo } } }),
+    prisma.leaderboardEvent.count({
+      where: { leaderboardId: board.id, eventType: "NEW_TOP", createdAt: { gte: startOfToday } },
+    }),
+  ]);
 
   return {
     leaderboard: {
@@ -42,4 +46,4 @@ export async function getLeaderboardData(slug: string): Promise<LeaderboardRespo
     })),
     momentum: { bidsLastHour, topChangesToday },
   };
-}
+});
