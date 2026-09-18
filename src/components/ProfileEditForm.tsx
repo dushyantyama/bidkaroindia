@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { instagramProfileUrl } from "@/lib/instagram";
+import { Avatar } from "@/components/Avatar";
 
 type Initial = { city: string; instagram: string; avatarUrl: string };
 
@@ -53,7 +54,15 @@ export function ProfileEditForm({ initial }: { initial: Initial }) {
         placeholder="e.g. Ahmedabad"
         className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm"
       />
-      <label className="text-xs text-white/40 mt-1">Logo / avatar image URL (optional)</label>
+      <div className="flex items-center gap-3 mt-1">
+        <Avatar username={initial.instagram || "you"} avatarUrl={avatarUrl} instagram={initial.instagram} link={false} />
+        <p className="text-xs text-white/40">
+          {avatarUrl
+            ? "Using your custom image below."
+            : "Auto-generated from your handle. Paste an image URL below to use your real photo."}
+        </p>
+      </div>
+      <label className="text-xs text-white/40 mt-1">Custom logo / avatar URL (optional)</label>
       <input
         value={avatarUrl}
         onChange={(e) => setAvatarUrl(e.target.value)}

@@ -8,28 +8,10 @@ import { useActivityFeed } from "@/hooks/useActivityFeed";
 import { useIdentity } from "@/hooks/useIdentity";
 import { OutbidModal } from "@/components/OutbidModal";
 import { InstagramHandle } from "@/components/InstagramHandle";
-import { instagramProfileUrl } from "@/lib/instagram";
-import type { LeaderboardResponse, LeaderboardRow } from "@/types/leaderboard";
+import { Avatar } from "@/components/Avatar";
+import type { LeaderboardResponse } from "@/types/leaderboard";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
-
-function RowAvatar({ row }: { row: LeaderboardRow }) {
-  const avatar = row.avatarUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={row.avatarUrl} alt={row.username} className="w-8 h-8 rounded-full object-cover bg-white/10 shrink-0" />
-  ) : (
-    <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold shrink-0">
-      {row.username[0]?.toUpperCase()}
-    </span>
-  );
-
-  if (!row.instagram) return avatar;
-  return (
-    <a href={instagramProfileUrl(row.instagram)} target="_blank" rel="noopener noreferrer nofollow" onClick={(e) => e.stopPropagation()}>
-      {avatar}
-    </a>
-  );
-}
 
 export function LeaderboardBoard({ slug, initialData }: { slug: string; initialData: LeaderboardResponse }) {
   const { identity } = useIdentity();
@@ -87,15 +69,22 @@ export function LeaderboardBoard({ slug, initialData }: { slug: string; initialD
                   <span className="w-8 text-center text-lg font-black text-white/70 shrink-0">
                     {MEDALS[row.rank - 1] ?? `#${row.rank}`}
                   </span>
-                  <RowAvatar row={row} />
+                  <Avatar
+                    username={row.username}
+                    avatarUrl={row.avatarUrl}
+                    instagram={row.instagram}
+                    size="sm"
+                    ring={row.rank === 1}
+                  />
                   <div className="min-w-0">
                     <p className="font-bold leading-tight truncate">
                       <InstagramHandle username={row.username} instagram={row.instagram} />{" "}
                       {row.username === myUsername && <span className="text-xs text-white/40">(you)</span>}
                     </p>
                     <p className="text-xs text-white/40 truncate">
-                      {row.city ? `${row.city} · ` : ""}
-                      {timeAgo(row.bidAt)}
+                      {[row.instagram && row.instagram !== row.username ? `@${row.instagram}` : null, row.city, timeAgo(row.bidAt)]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   </div>
                 </div>

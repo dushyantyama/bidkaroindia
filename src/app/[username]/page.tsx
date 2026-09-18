@@ -6,6 +6,7 @@ import { getCategoryMeta } from "@/lib/categories";
 import { instagramProfileUrl } from "@/lib/instagram";
 import { Navbar } from "@/components/Navbar";
 import { ShareButton } from "@/components/ShareButton";
+import { Avatar } from "@/components/Avatar";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
   const { username } = await params;
@@ -36,26 +37,15 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       <Navbar />
       <section className="max-w-sm mx-auto pt-10 px-4">
         <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
-          {(() => {
-            const avatarImg = profile.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatarUrl}
-                alt={profile.username}
-                className="w-20 h-20 rounded-full object-cover mx-auto mb-3 bg-white/10 ring-2 ring-saffron/40"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center text-2xl font-black ring-2 ring-saffron/40">
-                {profile.username[0]?.toUpperCase()}
-              </div>
-            );
-            if (!profile.instagram) return avatarImg;
-            return (
-              <a href={instagramProfileUrl(profile.instagram)} target="_blank" rel="noopener noreferrer nofollow" title="Open on Instagram">
-                {avatarImg}
-              </a>
-            );
-          })()}
+          <div className="flex justify-center mb-3">
+            <Avatar
+              username={profile.username}
+              avatarUrl={profile.avatarUrl}
+              instagram={profile.instagram}
+              size="lg"
+              ring
+            />
+          </div>
           <h1 className="text-xl font-black">
             {profile.instagram ? (
               <a href={instagramProfileUrl(profile.instagram)} target="_blank" rel="noopener noreferrer nofollow" className="hover:underline">
